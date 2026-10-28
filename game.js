@@ -46,7 +46,7 @@ var hit_timer = 0 ;
 var game_tier_score = [0,0,0,0];
 var weight_power = 0;
 var leader_me_arr = ["나",1,1,1,1,1]; // 내 자신
-var surround_arr = [["나",1,1,1,1,1],["너",1,1,1,1,1],["밤나무",1,1,1,1,1]]; // 주변 3인
+var surround_arr = [["나",1,1,1,1,1],["[다른플레이어]",1,1,1,1,1],["[다른플레이어]",1,1,1,1,1]]; // 주변 3인
 var backButtonPressed = 0; // 뒤로가기 버튼 무효 처리 상태를 저장하는 변수
 var test_nick;
 var text_color_time  =0;
@@ -742,10 +742,7 @@ var game = new Phaser.Game(config);
 function preload() { // 첫번째로 실행됨 -  주로 데이터 로딩
 
         var url;
-        url = 'https://raw.githubusercontent.com/rexrainbow/phaser3-rex-notes/master/dist/rexbbcodetextplugin.min.js';
-        this.load.plugin('rexbbcodetextplugin', url, true);
-      
-        url = 'https://raw.githubusercontent.com/rexrainbow/phaser3-rex-notes/master/dist/rextexteditplugin.min.js';
+        url = 'https://cdn.jsdelivr.net/npm/phaser3-rex-plugins@1.80.20/dist/rextexteditplugin.min.js';
         this.load.plugin('rextexteditplugin', url, true);
     
         this.load.audio('bgm_m1', './6. 배경음/배경음1.mp3');
@@ -1296,7 +1293,7 @@ function create() {
 
     nick_finish_text_box= this.add.text(540,840 , '100%', {fontFamily:"MainFont", fontSize: '35px', fill: '#A19AAD' }); //점수
     nick_finish_text_box.setOrigin(0.5,0);
-    nick_input_text_box = this.add.rexBBCodeText(540, 860, hintText, {
+    nick_input_text_box = this.add.text(540, 860, hintText, {
         color: '#A19AAD',
         fontFamily: "MainFont",
         fontSize: '35px',
@@ -1316,21 +1313,7 @@ function create() {
                 }
             },
             onTextChanged: function (textObject, text) {
-                // 띄어쓰기 제거
-                text = text.replace(/\s+/g, '');
-            
-                // 한글 자음, 모음 및 영어 문자만 포함하는지 확인하는 정규 표현식
-                const regex = /^[가-힣ㄱ-ㅎㅏ-ㅣa-zA-Z0-9]+$/;
-            
-                if (text.length > 8) {
-                    text = text.substring(0, 8);
-                }
-            
-                if (text.length >= 2 && regex.test(text)) {
-                    textObject.text = text;
-                } else {
-                    textObject.text = hintText;
-                }
+                textObject.text = text;
             
                 // Re-center the text
                 textObject.setOrigin(0.68, 0.5);
@@ -2602,10 +2585,15 @@ async function button_fun(button1){//클릭 애니메이션 이후 버튼 발동
             }
         }
         if (nick_input_text_box.text.indexOf(' ') !== -1) {
+            alert("닉네임에 공백을 사용할 수 없습니다.");
             return;
         }
         if (nick_input_text_box.text.length > 8||nick_input_text_box.text.length < 2) {
-            
+            alert("닉네임은 2~8자로 입력해 주세요.");
+            return;
+        }
+        if (!/^[가-힣ㄱ-ㅎㅏ-ㅣa-zA-Z0-9]+$/.test(nick_input_text_box.text)) {
+            alert("닉네임에는 한글, 영문, 숫자만 사용할 수 있습니다.");
             return;
         }
 
@@ -2997,7 +2985,7 @@ function key_pc(){
         if (arrow.right.isDown == false&&keyD.isDown == false) {
             touch_right =false;
         }
-        if((arrow.down.isDown||keyS.isDown) && skill_cool == false){
+        if((arrow.down.isDown||keyS.isDown||arrow.space.isDown) && skill_cool == false){
             if(aris_power == 0 && character_choice_num == 3&&skill_is == false&&play_character.skill_gaze > 0){
                 play_character.skill_gaze -= 33;
                 if(play_character.skill_gaze <= 0){
@@ -3020,7 +3008,7 @@ function key_pc(){
             //skill_image.setVisible(true);
         }
 
-        if(arrow.down.isUp&&keyS.isUp){
+        if(arrow.down.isUp&&keyS.isUp&&arrow.space.isUp){
             if(character_choice_num == 3 &&aris_power > 0 && aris_skill_is == false){
 
                 skill_use.bind(this)();
